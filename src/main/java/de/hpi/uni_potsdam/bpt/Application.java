@@ -55,7 +55,8 @@ public class Application {
             }
         }); */
         Table result = tblEnv.sqlQuery("SELECT MIN(R1.price) FROM " + result1 + " AS R1 JOIN " + result1 + " AS R2 ON R1.stockName = R2.stockName" );
-        DataStream<Tuple2<Boolean, Tuple2<String, Integer>>> resultStream = tblEnv.toRetractStream(result, Types.TUPLE(Types.INT));
+        Table result2 = tblEnv.sqlQuery("SELECT * FROM "+ result);
+        DataStream<Tuple2<Boolean, Tuple2<String, Integer>>> resultStream = tblEnv.toRetractStream(result2, Types.TUPLE(Types.INT));
         resultStream.addSink(new SinkFunction<Tuple2<Boolean, Tuple2<String, Integer>>>() {
             @Override
             public void invoke(Tuple2<Boolean, Tuple2<String, Integer>> value, Context context) throws Exception {
