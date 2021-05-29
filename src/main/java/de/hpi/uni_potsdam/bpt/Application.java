@@ -42,11 +42,7 @@ public class Application {
 
     // Passen Sie diese Funktion entsprechend der Aufgabenstellung an
     private void runQueries() throws Exception {
-        Table result1 = tblEnv.sqlQuery("SELECT * FROM " + xetraTable);
-
-
-
-
+        Table xetraResult = tblEnv.sqlQuery("SELECT * FROM " + xetraTable);
        /* DataStream<Tuple2<Boolean, Tuple2<String, Integer>>> resultStream = tblEnv.toRetractStream(result, Types.TUPLE(Types.STRING, Types.INT));
         resultStream.addSink(new SinkFunction<Tuple2<Boolean, Tuple2<String, Integer>>>() {
             @Override
@@ -54,9 +50,15 @@ public class Application {
                 System.out.println("New Result: " + (value.f0 ? "added " : "deleted ") + "tuple " + value.f1);
             }
         }); */
-        Table result = tblEnv.sqlQuery("SELECT MIN(R1.price) FROM " + result1 + " AS R1 JOIN " + result1 + " AS R2 ON R1.stockName = R2.stockName" );
-        Table result2 = tblEnv.sqlQuery("SELECT * FROM "+ result);
-        DataStream<Tuple2<Boolean, Tuple2<String, Integer>>> resultStream = tblEnv.toRetractStream(result2, Types.TUPLE(Types.INT));
+
+
+        Table xetraMin = tblEnv.sqlQuery("SELECT MIN(X1.price) FROM " + xetraResult + " AS X1 JOIN " + xetraResult + " AS X2 ON X1.stockName = X2.stockName" );
+
+        Table nyseResult = tblEnv.sqlQuery("SELECT * FROM "+ nyseTable);
+        Table nyseMin = tblEnv.sqlQuery("SELECT MIN(N1.price) FROM " + nyseResult + " AS N1 JOIN " + nyseResult + " AS N2 ON N1.stockName = N2.stockName" );
+
+
+        DataStream<Tuple2<Boolean, Tuple2<String, Integer>>> resultStream = tblEnv.toRetractStream(nyseMin, Types.TUPLE(Types.INT));
         resultStream.addSink(new SinkFunction<Tuple2<Boolean, Tuple2<String, Integer>>>() {
             @Override
             public void invoke(Tuple2<Boolean, Tuple2<String, Integer>> value, Context context) throws Exception {
